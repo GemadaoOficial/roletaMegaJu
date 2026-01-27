@@ -85,47 +85,50 @@ export default function Admin() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-gray-900 text-white p-8 overflow-y-auto">
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="w-full min-h-screen bg-gray-900 text-white p-3 sm:p-6 md:p-8 overflow-y-auto">
+            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
 
                 {/* Controls */}
-                <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <RefreshCw className="w-6 h-6 text-primary" /> Controle
+                <div className="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-700">
+                    <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+                        <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Controle
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         <button
                             onClick={handleSpin}
                             disabled={!canSpin}
-                            className={`w-full py-4 rounded-lg font-bold text-xl flex items-center justify-center gap-2 transition-all shadow-lg
+                            className={`w-full py-3 sm:py-4 rounded-lg font-bold text-lg sm:text-xl flex items-center justify-center gap-2 transition-all shadow-lg
                                 ${canSpin
                                     ? 'bg-green-600 hover:bg-green-500 active:scale-95 shadow-green-900/50 cursor-pointer'
                                     : 'bg-gray-600 cursor-not-allowed opacity-50'
                                 }`}
                             title={!canSpin ? 'Adicione pelo menos um prêmio com probabilidade maior que 0%' : 'Girar a roleta'}
                         >
-                            <Play className="fill-current" /> GIRAR ROLETA
+                            <Play className="fill-current w-5 h-5 sm:w-6 sm:h-6" />
+                            <span className="hidden sm:inline">GIRAR ROLETA</span>
+                            <span className="sm:hidden">GIRAR</span>
                         </button>
                         {!canSpin && (
-                            <p className="text-sm text-yellow-400 text-center">
+                            <p className="text-xs sm:text-sm text-yellow-400 text-center">
                                 ⚠️ Configure pelo menos um prêmio com probabilidade {'>'} 0% para girar
                             </p>
                         )}
 
                         <button
                             onClick={handleToggleVisibility}
-                            className={`w-full py-3 rounded-lg font-bold text-lg transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 
+                            className={`w-full py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2
                                 ${isVisible ? 'bg-red-600 hover:bg-red-500 shadow-red-900/50' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-900/50'}`}
                         >
-                            {isVisible ? <EyeOff /> : <Eye />}
-                            {isVisible ? 'OCULTAR ROLETA' : 'MOSTRAR ROLETA'}
+                            {isVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            <span className="hidden sm:inline">{isVisible ? 'OCULTAR ROLETA' : 'MOSTRAR ROLETA'}</span>
+                            <span className="sm:hidden">{isVisible ? 'OCULTAR' : 'MOSTRAR'}</span>
                         </button>
                     </div>
 
-                    <div className="mt-8 space-y-4">
+                    <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">Tema da Roleta</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-400 mb-2">Tema da Roleta</label>
                             <select
                                 value={config.theme}
                                 onChange={(e) => {
@@ -133,57 +136,56 @@ export default function Admin() {
                                     updateConfig({ theme: newTheme });
                                     syncState({ config: { ...config, theme: newTheme } });
                                 }}
-                                className="w-full bg-gray-900 border border-gray-700 rounded p-2 focus:border-primary outline-none transition-colors"
+                                className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm sm:text-base focus:border-primary outline-none transition-colors"
                             >
                                 <option value="cyberpunk">Cyberpunk / Neon</option>
-                                <option value="pop">Pop / Cute 3D</option>
                             </select>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">Tempo de Giro (segundos)</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-400 mb-2">Tempo de Giro (segundos)</label>
                             <input
                                 type="number"
                                 value={config.spinDuration}
                                 onChange={(e) => updateConfig({ spinDuration: Number(e.target.value) })}
-                                className="w-full bg-gray-900 border border-gray-700 rounded p-2 focus:border-primary outline-none transition-colors"
+                                className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm sm:text-base focus:border-primary outline-none transition-colors"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Prizes */}
-                <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold">Prêmios ({prizes.length})</h2>
-                        <div className="flex items-center gap-2">
+                <div className="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-700">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+                        <h2 className="text-xl sm:text-2xl font-bold">Prêmios ({prizes.length})</h2>
+                        <div className="flex items-center gap-2 flex-wrap">
                             <button
                                 onClick={handleNormalize}
-                                className="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-full font-bold transition-colors shadow shadow-blue-900/50"
+                                className="text-xs bg-blue-600 hover:bg-blue-500 px-2.5 sm:px-3 py-1 rounded-full font-bold transition-colors shadow shadow-blue-900/50"
                                 title="Ajustar matemática para somar 100% exatamente"
                             >
                                 Balancear
                             </button>
-                            <div className={`text-sm font-bold px-3 py-1 rounded-full ${Math.abs(totalProbability - 100) < 0.1 ? 'bg-green-600' : 'bg-yellow-600'}`}>
+                            <div className={`text-xs sm:text-sm font-bold px-2.5 sm:px-3 py-1 rounded-full ${Math.abs(totalProbability - 100) < 0.1 ? 'bg-green-600' : 'bg-yellow-600'}`}>
                                 Total: {totalProbability.toFixed(0)}%
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-4 sm:mb-6">
                         <input
                             type="text"
                             placeholder="Nome do prêmio"
                             value={newPrize}
                             onChange={(e) => setNewPrize(e.target.value)}
-                            className="flex-[2] bg-gray-900 border border-gray-700 rounded p-2 focus:border-primary outline-none min-w-0"
+                            className="flex-1 min-w-[150px] bg-gray-900 border border-gray-700 rounded p-2 text-sm sm:text-base focus:border-primary outline-none"
                         />
                         <input
                             type="number"
                             placeholder="%"
                             value={newProb}
                             onChange={(e) => setNewProb(e.target.value)}
-                            className="w-16 bg-gray-900 border border-gray-700 rounded p-2 focus:border-primary outline-none text-center"
+                            className="w-14 sm:w-16 bg-gray-900 border border-gray-700 rounded p-2 text-sm sm:text-base focus:border-primary outline-none text-center"
                         />
                         <input
                             type="color"
@@ -195,15 +197,15 @@ export default function Admin() {
                             onClick={handleAdd}
                             className="p-2 bg-primary hover:bg-secondary rounded transition-colors shrink-0"
                         >
-                            <Plus />
+                            <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
                     </div>
 
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+                    <div className="space-y-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto custom-scrollbar">
                         {prizes.map((prize) => (
-                            <div key={prize.id} className="flex items-center justify-between p-3 bg-gray-900 rounded group border border-transparent hover:border-gray-600 transition-colors gap-3">
-                                <div className="flex items-center gap-3 overflow-hidden flex-1">
-                                    <div className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: prize.color }} />
+                            <div key={prize.id} className="flex items-center justify-between p-2 sm:p-3 bg-gray-900 rounded group border border-transparent hover:border-gray-600 transition-colors gap-2 sm:gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3 overflow-hidden flex-1 min-w-0">
+                                    <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full shrink-0" style={{ backgroundColor: prize.color }} />
                                     <input
                                         type="text"
                                         value={prize.text}
@@ -213,26 +215,26 @@ export default function Admin() {
                                             const updatedPrizes = prizes.map(p => p.id === prize.id ? { ...p, text: e.target.value } : p);
                                             syncState({ prizes: updatedPrizes });
                                         }}
-                                        className="font-medium bg-transparent border-b border-transparent hover:border-gray-500 focus:border-primary outline-none w-full text-white transition-colors"
+                                        className="font-medium bg-transparent border-b border-transparent hover:border-gray-500 focus:border-primary outline-none w-full text-white transition-colors text-sm sm:text-base"
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                     <div className="relative">
                                         <input
                                             type="number"
                                             value={prize.probability || 0}
                                             onChange={(e) => handleUpdateProb(prize.id, e.target.value)}
-                                            className="w-16 bg-gray-800 border border-gray-600 rounded p-1 text-center text-sm focus:border-primary outline-none"
+                                            className="w-12 sm:w-16 bg-gray-800 border border-gray-600 rounded p-1 text-center text-xs sm:text-sm focus:border-primary outline-none"
                                         />
-                                        <span className="absolute right-[-10px] top-1 text-gray-500 text-xs">%</span>
+                                        <span className="absolute right-[-8px] sm:right-[-10px] top-0.5 sm:top-1 text-gray-500 text-xs">%</span>
                                     </div>
 
                                     <button
                                         onClick={() => handleRemove(prize.id)}
                                         className="text-gray-500 hover:text-red-500 transition-colors p-1"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
                                     </button>
                                 </div>
                             </div>
