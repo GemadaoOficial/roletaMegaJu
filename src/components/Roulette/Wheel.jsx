@@ -37,9 +37,9 @@ const playTickSound = (speed = 1.0) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
-        const freq = 400 + (speed * 1000); // 400-1400 Hz based on speed
-        const duration = 0.1;
-        const volume = 0.5 + (speed * 0.3); // 0.5-0.8
+        const freq = 250 + (speed * speed * speed * 1150); // Cubic: 250-1400 Hz
+        const duration = 0.06 + ((1 - speed) * 0.06); // Longer ticks when slower
+        const volume = 0.08 + (speed * speed * speed * 0.52); // Cubic: 0.08-0.60
 
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
@@ -103,17 +103,18 @@ const startDynamicSpinSound = (getSpeedFn) => {
             const speed = getSpeedFn();
             const now = Date.now();
 
-            // Modulate oscillators based on speed
+            // Modulate oscillators based on speed (exponential curves for dramatic fade)
             const t = ctx.currentTime;
-            rumbleOsc.frequency.setTargetAtTime(100 + (speed * 150), t, 0.1);
-            rumbleGain.gain.setTargetAtTime(0.06 + (speed * 0.14), t, 0.1);
-            whooshOsc.frequency.setTargetAtTime(200 + (speed * 400), t, 0.1);
-            whooshGain.gain.setTargetAtTime(0.02 + (speed * 0.12), t, 0.1);
-            airOsc.frequency.setTargetAtTime(400 + (speed * 600), t, 0.1);
-            airGain.gain.setTargetAtTime(0.01 + (speed * 0.06), t, 0.1);
+            const s3 = speed * speed * speed; // Cubic curve - even more aggressive fade
+            rumbleOsc.frequency.setTargetAtTime(60 + (s3 * 190), t, 0.1);
+            rumbleGain.gain.setTargetAtTime(0.005 + (s3 * 0.15), t, 0.2);
+            whooshOsc.frequency.setTargetAtTime(120 + (s3 * 480), t, 0.1);
+            whooshGain.gain.setTargetAtTime(0.003 + (s3 * 0.10), t, 0.2);
+            airOsc.frequency.setTargetAtTime(250 + (s3 * 750), t, 0.1);
+            airGain.gain.setTargetAtTime(0.002 + (s3 * 0.05), t, 0.2);
 
-            // Tick sounds at intervals based on speed
-            const interval = 40 + ((1 - speed) * 140); // 40-180ms
+            // Tick sounds at intervals based on speed (wider range for dramatic effect)
+            const interval = 40 + ((1 - speed) * 260); // 40-300ms
             if (now - lastTickTime >= interval) {
                 playTickSound(speed);
                 lastTickTime = now;
@@ -714,7 +715,15 @@ export default function Wheel() {
                     // Calculate speed and update for audio
                     const rotationDelta = rotation - lastRotation;
                     const normalizedSpeed = Math.min(1, Math.abs(rotationDelta) / 50);
-                    currentSpeed = Math.max(0.05, normalizedSpeed); // Update current speed
+                    // Aggressive fade: 60% reduction starts at 50%, then extra 35% in final 30%
+                    let fadeMult = 1;
+                    if (progress > 0.5) {
+                        fadeMult = 1 - ((progress - 0.5) / 0.5) * 0.6; // First 50% reduction
+                    }
+                    if (progress > 0.7) {
+                        fadeMult *= 1 - ((progress - 0.7) / 0.3) * 0.35; // Additional 35% in final stretch
+                    }
+                    currentSpeed = Math.max(0.01, normalizedSpeed * fadeMult);
                     lastRotation = rotation;
 
                     if (totalSlicesPassed !== lastSliceIndex) {
@@ -742,8 +751,7 @@ export default function Wheel() {
                     setWinningIndex(winnerIndex);
                     setIsSpinning(false);
                     stopSpin(prize);
-                    stopSpinSound(); // Stop the continuous sound
-                    playWinSound();
+                    stopSpinSound(); // Stop the continuous sound (no win sound yet)
 
                     // Initial confetti burst
                     const colors = isPop ? ['#ff00ff', '#ff69b4', '#ffff00', '#ffffff'] : ['#00f7ff', '#ffd700', '#bc13fe', '#ffffff'];
@@ -789,6 +797,7 @@ export default function Wheel() {
                     setTimeout(() => {
                         setWinnerModal(prize);
                         clearInterval(sparkleInterval);
+                        playWinSound(); // Play win sound when modal appears
                     }, 500);
 
                     // Final burst when modal appears
