@@ -176,20 +176,22 @@ const stopSpinSound = () => {
         spinSoundInterval = null;
     }
     if (!audioEnabled) return;
-    // Fade out all oscillators quickly with linear ramp (faster and reaches exact 0)
+    // Fade out all oscillators with proper cleanup
     spinOscillators.forEach(({ osc, gain }) => {
         try {
             const ctx = getAudioCtx();
             if (!ctx) return;
-            // Linear ramp to 0 is faster and guaranteed to reach silence
+            // Cancel any scheduled changes and fade to 0
             gain.gain.cancelScheduledValues(ctx.currentTime);
             gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15); // Faster fade: 150ms
-            osc.stop(ctx.currentTime + 0.2); // Stop after fade completes
-        } catch (e) { }
+            gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.3); // Smoother fade: 300ms
+            osc.stop(ctx.currentTime + 0.35); // Stop after fade completes
+        } catch (e) {
+            console.warn('[AUDIO] Error stopping oscillator:', e);
+        }
     });
     spinOscillators = [];
-    console.log('[AUDIO] Spin sound stopped (150ms fade)');
+    console.log('[AUDIO] Spin sound stopped (300ms fade)');
 };
 
 const playSpinAmbience = () => { };
@@ -293,12 +295,13 @@ const CyberpunkPointer = ({ tickRef }) => (
 );
 
 
-const CyberpunkCenter = ({ isSpinning, size = 600 }) => {
+const CyberpunkCenter = ({ isSpinning, size = 600, onSpin }) => {
     const centerSize = Math.max(80, size * 0.21); // Min 80px, 21% of wheel size
     const fontSize = Math.max(14, size * 0.04); // Responsive text size
     return (
         <div
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 rounded-full bg-black border-4 border-[#bc13fe] shadow-[0_0_20px_#bc13fe] flex items-center justify-center overflow-hidden transition-all duration-300 ${isSpinning ? 'scale-110 shadow-[0_0_40px_#bc13fe] animate-pulse' : ''}`}
+            onClick={onSpin}
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 rounded-full bg-black border-4 border-[#bc13fe] shadow-[0_0_20px_#bc13fe] flex items-center justify-center overflow-hidden transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 ${isSpinning ? 'scale-110 shadow-[0_0_40px_#bc13fe] animate-pulse pointer-events-none' : 'hover:shadow-[0_0_30px_#bc13fe]'}`}
             style={{ width: `${centerSize}px`, height: `${centerSize}px` }}
         >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#2a2a2a_0%,_#000_100%)]"></div>
@@ -337,7 +340,15 @@ export default function Wheel() {
     const [winnerModal, setWinnerModal] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
 
-    const { prizes, mustSpin, config, stopSpin, updateConfig } = useRouletteStore();
+    const { prizes, mustSpin, config, stopSpin, updateConfig, startSpin } = useRouletteStore();
+
+    // Handle manual spin from clicking the logo
+    const handleManualSpin = () => {
+        if (!isSpinning && prizes.length > 0) {
+            console.log('[WHEEL] Manual spin triggered by logo click');
+            startSpin();
+        }
+    };
 
     // Force cyberpunk theme - pop theme was removed
     useEffect(() => {
@@ -738,7 +749,7 @@ export default function Wheel() {
 
             gsap.to(containerRef.current, {
                 rotation: totalRotation,
-                duration: 12, // Increased from 8 to 12 seconds
+                duration: 18, // Increased from 12 to 18 seconds for longer suspense
                 ease: 'power3.out', // More gradual deceleration
                 onUpdate: function () {
                     const rotation = this.targets()[0]._gsap.rotation;
@@ -779,6 +790,8 @@ export default function Wheel() {
                     setWinningIndex(winnerIndex);
                     setIsSpinning(false);
                     stopSpin(prize);
+
+                    console.log('[AUDIO] Spin complete, stopping spin sound');
                     stopSpinSound(); // Stop the continuous sound - takes 300ms to fade out
 
                     // Initial confetti burst
@@ -826,8 +839,9 @@ export default function Wheel() {
                     setTimeout(() => {
                         setWinnerModal(prize);
                         clearInterval(sparkleInterval);
+                        console.log('[AUDIO] Playing win sound');
                         playWinSound(); // Play win sound AFTER spin sound is fully stopped
-                    }, 400); // Increased from 500ms to 400ms after ensuring spin sound stops
+                    }, 500); // 500ms ensures 300ms fade + 200ms buffer
 
                     // Final burst when modal appears
                     setTimeout(() => {
@@ -839,7 +853,7 @@ export default function Wheel() {
                             shapes: ['circle', 'square'],
                             gravity: 1.2
                         });
-                    }, 700); // Adjusted to match new modal timing
+                    }, 800); // Adjusted to match new modal timing
                 }
             });
             }); // end buildupTl.call
@@ -860,7 +874,7 @@ export default function Wheel() {
 
             <CyberpunkPointer tickRef={pointerRef} />
             <CyberpunkFrame />
-            <CyberpunkCenter isSpinning={isSpinning} size={size} />
+            <CyberpunkCenter isSpinning={isSpinning} size={size} onSpin={handleManualSpin} />
 
             {/* Flying particles during spin */}
             {isSpinning && (
