@@ -14,6 +14,10 @@ const PORT = 5001;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from dist folder
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
+
 // Data file path
 const dataFilePath = path.join(__dirname, 'data.json');
 const spinFilePath = path.join(__dirname, 'spin_command.json');
@@ -117,7 +121,13 @@ app.get('/api/spin', (req, res) => {
     }
 });
 
+// Serve index.html for all non-API routes (SPA support)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 API Server running on http://localhost:${PORT}`);
     console.log(`📡 Accepting connections from network`);
+    console.log(`📁 Serving static files from: ${distPath}`);
 });
