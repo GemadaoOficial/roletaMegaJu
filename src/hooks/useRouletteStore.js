@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 const DEFAULT_PRIZES = [
     { id: '1', text: '5% OFF', color: '#FF5733', probability: 10 },
@@ -10,36 +9,94 @@ const DEFAULT_PRIZES = [
     { id: '6', text: 'R$ 10,00', color: '#33FFF5', probability: 5 },
 ];
 
-export const useRouletteStore = create(
-    persist(
-        (set) => ({
-            prizes: DEFAULT_PRIZES,
-            config: {
-                spinDuration: 5, // in seconds
-                winnerMessage: 'Parabéns! Você ganhou:',
-                theme: 'cyberpunk', // 'cyberpunk' | 'pop'
-            },
-            isSpinning: false,
-            winner: null,
-            mustSpin: false, // signal to start spin in overlay
-            isVisible: false,
+// API endpoint - Uses Vite proxy to Node.js server
+const API_URL = '/api/sync';
 
-            setPrizes: (prizes) => set({ prizes }),
-            addPrize: (prize) => set((state) => ({ prizes: [...state.prizes, prize] })),
-            removePrize: (id) => set((state) => ({ prizes: state.prizes.filter((p) => p.id !== id) })),
-            updateConfig: (newConfig) => set((state) => ({ config: { ...state.config, ...newConfig } })),
+export const useRouletteStore = create((set, get) => ({
+    prizes: DEFAULT_PRIZES,
+    config: {
+        spinDuration: 5, // in seconds
+        winnerMessage: 'Parabéns! Você ganhou:',
+        theme: 'cyberpunk', // 'cyberpunk' | 'pop'
+    },
+    isSpinning: false,
+    winner: null,
+    mustSpin: false, // signal to start spin in overlay
+    isVisible: false,
+    lastSyncTimestamp: 0,
 
-            updatePrize: (id, updates) => set((state) => ({ prizes: state.prizes.map((p) => (p.id === id ? { ...p, ...updates } : p)) })),
+    // Sync state from server
+    syncFromServer: async () => {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error('Failed to fetch from server');
+            const data = await response.json();
 
-            setIsVisible: (isVisible) => set({ isVisible }),
-
-            startSpin: () => set({ isSpinning: true, mustSpin: true, winner: null }),
-            stopSpin: (winner) => set({ isSpinning: false, mustSpin: false, winner }),
-            resetSpin: () => set({ mustSpin: false, isSpinning: false, winner: null }),
-        }),
-        {
-            name: 'roulette-storage', // unique name
-            partialize: (state) => ({ prizes: state.prizes, config: state.config, isVisible: state.isVisible }), // only persist prizes and config
+            set({
+                prizes: data.prizes || DEFAULT_PRIZES,
+                config: data.config || get().config,
+                isVisible: data.isVisible !== undefined ? data.isVisible : false,
+                lastSyncTimestamp: data.lastUpdated || Date.now()
+            });
+            console.log('[SYNC] State synced from server');
+        } catch (error) {
+            console.error('[SYNC] Failed to sync from server:', error);
         }
-    )
-);
+    },
+
+    // Sync state to server
+    syncToServer: async (updates) => {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            if (!response.ok) throw new Error('Failed to sync to server');
+            const result = await response.json();
+            console.log('[SYNC] State synced to server:', result);
+            return true;
+        } catch (error) {
+            console.error('[SYNC] Failed to sync to server:', error);
+            return false;
+        }
+    },
+
+    setPrizes: (prizes) => {
+        set({ prizes });
+        get().syncToServer({ prizes });
+    },
+
+    addPrize: (prize) => {
+        const prizes = [...get().prizes, prize];
+        set({ prizes });
+        get().syncToServer({ prizes });
+    },
+
+    removePrize: (id) => {
+        const prizes = get().prizes.filter((p) => p.id !== id);
+        set({ prizes });
+        get().syncToServer({ prizes });
+    },
+
+    updateConfig: (newConfig) => {
+        const config = { ...get().config, ...newConfig };
+        set({ config });
+        get().syncToServer({ config });
+    },
+
+    updatePrize: (id, updates) => {
+        const prizes = get().prizes.map((p) => (p.id === id ? { ...p, ...updates } : p));
+        set({ prizes });
+        get().syncToServer({ prizes });
+    },
+
+    setIsVisible: (isVisible) => {
+        set({ isVisible });
+        get().syncToServer({ isVisible });
+    },
+
+    startSpin: () => set({ isSpinning: true, mustSpin: true, winner: null }),
+    stopSpin: (winner) => set({ isSpinning: false, mustSpin: false, winner }),
+    resetSpin: () => set({ mustSpin: false, isSpinning: false, winner: null }),
+}));

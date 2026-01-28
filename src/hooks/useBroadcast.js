@@ -1,50 +1,87 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouletteStore } from './useRouletteStore';
 
-const CHANNEL_NAME = 'roulette_channel';
+// Use relative URLs - Vite will proxy to Node.js server
+const SYNC_API_URL = '/api/sync';
+const SPIN_API_URL = '/api/spin';
+const POLL_INTERVAL = 1000; // Poll every 1 second
 
 export const useBroadcast = (role = 'overlay') => {
-    const { setPrizes, updateConfig, startSpin, setIsVisible } = useRouletteStore();
+    const { syncFromServer, startSpin, lastSyncTimestamp } = useRouletteStore();
+    const lastKnownTimestamp = useRef(0);
 
     useEffect(() => {
-        const bc = new BroadcastChannel(CHANNEL_NAME);
+        // Initial sync from server
+        syncFromServer();
 
-        bc.onmessage = (event) => {
-            const { type, data } = event.data;
-            console.log(`[Broadcast] Received ${type}`, data);
+        // Poll for changes from server
+        const pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch(SYNC_API_URL);
+                if (!response.ok) return;
+                const data = await response.json();
 
-            switch (type) {
-                case 'SYNC_STATE':
-                    // Optional: Force sync if storage event fails or is too slow
-                    // In a real app with Zustand persist, this might be redundant for data, 
-                    // but useful for immediate "flash" updates.
-                    if (data.prizes) setPrizes(data.prizes);
-                    if (data.config) updateConfig(data.config);
-                    if (data.isVisible !== undefined) setIsVisible(data.isVisible);
-                    break;
-                case 'SPIN_COMMAND':
-                    // Admin says: SPIN!
-                    // We can pass the predetermined winner index here if we want rigged spins
-                    startSpin();
-                    break;
-                default:
-                    break;
+                // If server data is newer than our last known timestamp, sync
+                if (data.lastUpdated && data.lastUpdated > lastKnownTimestamp.current) {
+                    console.log('[POLL] New data detected, syncing...');
+                    lastKnownTimestamp.current = data.lastUpdated;
+                    syncFromServer();
+                }
+            } catch (error) {
+                console.error('[POLL] Error polling server:', error);
             }
+        }, POLL_INTERVAL);
+
+        // Poll for spin commands (only for overlay)
+        let spinPollInterval;
+        if (role === 'overlay') {
+            spinPollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(SPIN_API_URL);
+                    if (!response.ok) return;
+                    const data = await response.json();
+
+                    if (data.hasCommand) {
+                        console.log('[POLL] Spin command received!');
+                        startSpin();
+                    }
+                } catch (error) {
+                    console.error('[POLL] Error checking spin command:', error);
+                }
+            }, 500); // Check for spin commands every 500ms for faster response
+        }
+
+        return () => {
+            clearInterval(pollInterval);
+            if (spinPollInterval) clearInterval(spinPollInterval);
         };
+    }, [syncFromServer, startSpin, role]);
 
-        return () => bc.close();
-    }, [setPrizes, updateConfig, startSpin, setIsVisible]);
+    // Update lastKnownTimestamp when local store updates
+    useEffect(() => {
+        lastKnownTimestamp.current = lastSyncTimestamp;
+    }, [lastSyncTimestamp]);
 
-    const sendSpin = (winnerIndex = -1) => {
-        const bc = new BroadcastChannel(CHANNEL_NAME);
-        bc.postMessage({ type: 'SPIN_COMMAND', data: { winnerIndex } });
-        bc.close();
+    const sendSpin = async (winnerIndex = -1) => {
+        try {
+            const response = await fetch(SPIN_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ winnerIndex })
+            });
+            if (!response.ok) throw new Error('Failed to send spin command');
+            console.log('[SPIN] Spin command sent to server');
+
+            // Also trigger locally for immediate feedback
+            startSpin();
+        } catch (error) {
+            console.error('[SPIN] Error sending spin command:', error);
+        }
     };
 
+    // syncState is now handled automatically by the store methods
     const syncState = (state) => {
-        const bc = new BroadcastChannel(CHANNEL_NAME);
-        bc.postMessage({ type: 'SYNC_STATE', data: state });
-        bc.close();
+        console.log('[SYNC] Manual sync called (handled by store)');
     };
 
     return { sendSpin, syncState };

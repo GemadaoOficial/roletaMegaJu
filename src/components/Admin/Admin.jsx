@@ -5,8 +5,8 @@ import { Trash2, Plus, RefreshCw, Play, Eye, EyeOff } from 'lucide-react';
 
 export default function Admin() {
     // Added updatePrize to destructuring
-    const { prizes, addPrize, removePrize, updatePrize, config, updateConfig, startSpin, isVisible, setIsVisible } = useRouletteStore();
-    const { sendSpin, syncState } = useBroadcast();
+    const { prizes, addPrize, removePrize, updatePrize, setPrizes, config, updateConfig, startSpin, isVisible, setIsVisible } = useRouletteStore();
+    const { sendSpin } = useBroadcast();
 
     const [newPrize, setNewPrize] = useState('');
     const [newColor, setNewColor] = useState('#ffffff');
@@ -19,7 +19,6 @@ export default function Admin() {
     const handleToggleVisibility = () => {
         const newState = !isVisible;
         setIsVisible(newState);
-        syncState({ isVisible: newState });
     };
 
     const handleAdd = () => {
@@ -32,25 +31,15 @@ export default function Admin() {
         };
         addPrize(prize);
         setNewPrize('');
-
-        // Manual Sync because local update might be async or batched
-        const updatedPrizes = [...prizes, prize];
-        syncState({ prizes: updatedPrizes });
     };
 
     const handleRemove = (id) => {
         removePrize(id);
-        const updatedPrizes = prizes.filter(p => p.id !== id);
-        syncState({ prizes: updatedPrizes });
     };
 
     const handleUpdateProb = (id, newProb) => {
         const val = Number(newProb);
         updatePrize(id, { probability: val });
-
-        // Manual Sync
-        const updatedPrizes = prizes.map(p => p.id === id ? { ...p, probability: val } : p);
-        syncState({ prizes: updatedPrizes });
     };
 
     const handleNormalize = () => {
@@ -77,7 +66,7 @@ export default function Admin() {
             });
         }
 
-        syncState({ prizes: newPrizes });
+        setPrizes(newPrizes);
     };
 
     const handleSpin = () => {
@@ -85,8 +74,12 @@ export default function Admin() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-gray-900 text-white p-3 sm:p-6 md:p-8 overflow-y-auto">
-            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+        <div className="w-full min-h-screen bg-gray-900 text-white p-2 sm:p-4 md:p-6 lg:p-8 overflow-y-auto">
+            <div className="max-w-6xl mx-auto">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 sm:mb-6 md:mb-8 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">
+                    🎰 Painel Administrativo - Roleta Loja Mada
+                </h1>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
 
                 {/* Controls */}
                 <div className="bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg border border-gray-700">
@@ -132,9 +125,7 @@ export default function Admin() {
                             <select
                                 value={config.theme}
                                 onChange={(e) => {
-                                    const newTheme = e.target.value;
-                                    updateConfig({ theme: newTheme });
-                                    syncState({ config: { ...config, theme: newTheme } });
+                                    updateConfig({ theme: e.target.value });
                                 }}
                                 className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm sm:text-base focus:border-primary outline-none transition-colors"
                             >
@@ -211,9 +202,6 @@ export default function Admin() {
                                         value={prize.text}
                                         onChange={(e) => {
                                             updatePrize(prize.id, { text: e.target.value });
-                                            // Manual Sync
-                                            const updatedPrizes = prizes.map(p => p.id === prize.id ? { ...p, text: e.target.value } : p);
-                                            syncState({ prizes: updatedPrizes });
                                         }}
                                         className="font-medium bg-transparent border-b border-transparent hover:border-gray-500 focus:border-primary outline-none w-full text-white transition-colors text-sm sm:text-base"
                                     />
@@ -242,6 +230,7 @@ export default function Admin() {
                     </div>
                 </div>
 
+                </div>
             </div>
         </div>
     );

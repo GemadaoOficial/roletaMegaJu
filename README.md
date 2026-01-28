@@ -1,16 +1,98 @@
-# React + Vite
+# 🎰 Roleta Loja Mada
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de roleta da sorte com painel administrativo e sincronização em tempo real entre dispositivos.
 
-Currently, two official plugins are available:
+## 🚀 Instalação Super Rápida
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Instalar dependências
+```bash
+npm install
+```
 
-## React Compiler
+### 2. Rodar o projeto
+```bash
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Pronto! 🎉 O projeto vai rodar em:
+- **Frontend (Vite + React):** http://localhost:5000
+- **Backend (Node.js API):** http://localhost:5001
 
-## Expanding the ESLint configuration
+## 📱 Acessar do Celular
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Descubra o IP do seu PC
+```bash
+ipconfig
+```
+Procure pelo "Endereço IPv4" (ex: 192.168.1.100)
+
+### 2. Acesse do celular (mesma rede Wi-Fi)
+- **Painel Admin:** http://192.168.1.100:5000/admin
+- **Roleta (Overlay):** http://192.168.1.100:5000/
+
+## 🎮 Como Usar
+
+### Painel Administrativo (/admin)
+- **Gerenciar Prêmios:** Adicione, edite ou remova prêmios
+- **Ajustar Probabilidades:** Use "Balancear" para somar 100%
+- **Girar Roleta:** Clique em "GIRAR" - todos os dispositivos verão!
+- **Mostrar/Ocultar:** Controle a visibilidade da roleta
+
+### Overlay da Roleta (/)
+- Página limpa para transmissões (OBS Studio)
+- Responde automaticamente aos comandos do admin
+- Detecta OBS e desabilita áudio
+
+## 🔧 Estrutura do Projeto
+
+```
+roleta/
+├── server/              # API Node.js (porta 5001)
+│   ├── index.js         # Servidor Express
+│   ├── data.json        # Dados persistentes (auto-criado)
+│   └── spin_command.json
+├── src/                 # Frontend React (porta 5000)
+│   ├── hooks/           # Zustand store + sincronização
+│   ├── components/      # Admin + Roleta
+│   └── ...
+└── package.json
+```
+
+## ✨ Funcionalidades
+
+✅ **Sincronização entre dispositivos** via API Node.js
+✅ **100% Responsivo** - funciona em mobile, tablet, desktop
+✅ **Polling em tempo real** - atualizações automáticas
+✅ **Sem XAMPP/Apache** - apenas Node.js
+✅ **Fácil de usar** - apenas `npm run dev`
+
+## 🛠️ Scripts Disponíveis
+
+- `npm run dev` - Roda API + Frontend juntos
+- `npm run client` - Apenas o frontend (Vite)
+- `npm run api` - Apenas a API (Node.js)
+- `npm run build` - Build de produção
+
+## 🎨 Tecnologias
+
+- **Frontend:** React 19, Vite, Zustand, TailwindCSS, GSAP
+- **Backend:** Node.js, Express, CORS
+- **Animações:** Canvas Confetti, GSAP
+- **Áudio:** Web Audio API
+
+## 📞 Problemas?
+
+1. Verifique se a porta 5000 e 5001 estão livres
+2. Certifique-se de que está na mesma rede Wi-Fi
+3. Olhe o console do navegador (F12) para erros
+4. Verifique os logs do terminal do Node.js
+
+## 🎉 Pronto para usar!
+
+Agora você pode:
+- ✅ Alterar configurações em qualquer dispositivo
+- ✅ Girar a roleta de qualquer lugar
+- ✅ Usar em telas de todos os tamanhos
+- ✅ Integrar com OBS Studio
+
+**Sem XAMPP, sem PHP, sem complicação!** 🚀

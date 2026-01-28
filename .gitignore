@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Server runtime data
+server/data.json
+server/spin_command.json
+
+# Deployment files
+*.tar.gz
+porta5000.txt
+api/

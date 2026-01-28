@@ -176,17 +176,20 @@ const stopSpinSound = () => {
         spinSoundInterval = null;
     }
     if (!audioEnabled) return;
-    // Fade out all oscillators gracefully
+    // Fade out all oscillators quickly with linear ramp (faster and reaches exact 0)
     spinOscillators.forEach(({ osc, gain }) => {
         try {
             const ctx = getAudioCtx();
             if (!ctx) return;
-            gain.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
-            osc.stop(ctx.currentTime + 0.3);
+            // Linear ramp to 0 is faster and guaranteed to reach silence
+            gain.gain.cancelScheduledValues(ctx.currentTime);
+            gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15); // Faster fade: 150ms
+            osc.stop(ctx.currentTime + 0.2); // Stop after fade completes
         } catch (e) { }
     });
     spinOscillators = [];
-    console.log('[AUDIO] Spin sound stopped');
+    console.log('[AUDIO] Spin sound stopped (150ms fade)');
 };
 
 const playSpinAmbience = () => { };
@@ -776,7 +779,7 @@ export default function Wheel() {
                     setWinningIndex(winnerIndex);
                     setIsSpinning(false);
                     stopSpin(prize);
-                    stopSpinSound(); // Stop the continuous sound (no win sound yet)
+                    stopSpinSound(); // Stop the continuous sound - takes 300ms to fade out
 
                     // Initial confetti burst
                     const colors = false ? ['#ff00ff', '#ff69b4', '#ffff00', '#ffffff'] : ['#00f7ff', '#ffd700', '#bc13fe', '#ffffff'];
@@ -819,11 +822,12 @@ export default function Wheel() {
                         });
                     }, 100);
 
+                    // Wait for spin sound to fully stop (300ms fade) before showing modal and playing win sound
                     setTimeout(() => {
                         setWinnerModal(prize);
                         clearInterval(sparkleInterval);
-                        playWinSound(); // Play win sound when modal appears
-                    }, 500);
+                        playWinSound(); // Play win sound AFTER spin sound is fully stopped
+                    }, 400); // Increased from 500ms to 400ms after ensuring spin sound stops
 
                     // Final burst when modal appears
                     setTimeout(() => {
@@ -835,7 +839,7 @@ export default function Wheel() {
                             shapes: ['circle', 'square'],
                             gravity: 1.2
                         });
-                    }, 800);
+                    }, 700); // Adjusted to match new modal timing
                 }
             });
             }); // end buildupTl.call
