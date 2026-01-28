@@ -31,7 +31,9 @@ const DEFAULT_DATA = {
     config: {
         spinDuration: 5,
         winnerMessage: 'Parabéns! Você ganhou:',
-        theme: 'cyberpunk'
+        theme: 'cyberpunk',
+        blockedIds: ['1', '5'],
+        vipMode: false
     },
     isVisible: false,
     lastUpdated: Date.now()

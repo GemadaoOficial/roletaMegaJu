@@ -18,6 +18,8 @@ export const useRouletteStore = create((set, get) => ({
         spinDuration: 5, // in seconds
         winnerMessage: 'Parabéns! Você ganhou:',
         theme: 'cyberpunk', // 'cyberpunk' | 'pop'
+        blockedIds: ['1', '5'],
+        vipMode: false,
     },
     isSpinning: false,
     winner: null,

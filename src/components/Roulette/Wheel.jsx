@@ -274,25 +274,428 @@ const playWinSound = () => {
     } catch (e) { }
 };
 
+const playLegendaryWinSound = () => {
+    if (!audioEnabled) return;
+    try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+
+        // LEGENDARY FANFARE - Epic orchestral-style triumph
+        // Bass drum impact
+        const bassDrum = ctx.createOscillator();
+        const bassDrumGain = ctx.createGain();
+        bassDrum.type = 'sine';
+        bassDrum.frequency.setValueAtTime(60, ctx.currentTime);
+        bassDrum.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.1);
+        bassDrumGain.gain.setValueAtTime(0.8, ctx.currentTime);
+        bassDrumGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        bassDrum.connect(bassDrumGain);
+        bassDrumGain.connect(ctx.destination);
+        bassDrum.start(ctx.currentTime);
+        bassDrum.stop(ctx.currentTime + 0.3);
+
+        // Epic brass section - ascending triumph
+        const brassNotes = [
+            { freq: 261.63, time: 0.15, duration: 0.35, vol: 0.25 },  // C4
+            { freq: 329.63, time: 0.35, duration: 0.35, vol: 0.28 },  // E4
+            { freq: 392.00, time: 0.55, duration: 0.35, vol: 0.30 },  // G4
+            { freq: 523.25, time: 0.75, duration: 0.5, vol: 0.35 },   // C5 (held)
+            { freq: 659.25, time: 1.15, duration: 0.3, vol: 0.32 },   // E5
+            { freq: 783.99, time: 1.35, duration: 0.8, vol: 0.40 }    // G5 (long hold)
+        ];
+
+        brassNotes.forEach(({ freq, time, duration, vol }) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const startTime = ctx.currentTime + time;
+
+            osc.type = 'sawtooth'; // Brass-like tone
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(vol, startTime + 0.05);
+            gain.gain.setValueAtTime(vol * 0.9, startTime + duration * 0.7);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+
+        // Timpani rolls (rumble effect)
+        for (let i = 0; i < 12; i++) {
+            const timpani = ctx.createOscillator();
+            const timpaniGain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.2 + (i * 0.08);
+
+            timpani.type = 'sine';
+            timpani.frequency.setValueAtTime(80 + Math.random() * 20, startTime);
+            timpaniGain.gain.setValueAtTime(0.15, startTime);
+            timpaniGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
+
+            timpani.connect(timpaniGain);
+            timpaniGain.connect(ctx.destination);
+            timpani.start(startTime);
+            timpani.stop(startTime + 0.1);
+        }
+
+        // Cymbal crash + shimmer (golden sparkle effect)
+        const cymbalFreqs = [3000, 4200, 5800, 7200, 9500];
+        cymbalFreqs.forEach((freq, idx) => {
+            const cymbal = ctx.createOscillator();
+            const cymbalGain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.25;
+
+            cymbal.type = 'square';
+            cymbal.frequency.setValueAtTime(freq, startTime);
+
+            cymbalGain.gain.setValueAtTime(0.12, startTime);
+            cymbalGain.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
+
+            cymbal.connect(cymbalGain);
+            cymbalGain.connect(ctx.destination);
+            cymbal.start(startTime);
+            cymbal.stop(startTime + 1.5);
+        });
+
+        // Magical bell chimes (high frequency cascade)
+        for (let i = 0; i < 15; i++) {
+            const bell = ctx.createOscillator();
+            const bellGain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.5 + (i * 0.12);
+            const freq = 2093 + (i * 150) + Math.random() * 100;
+
+            bell.type = 'sine';
+            bell.frequency.setValueAtTime(freq, startTime);
+
+            bellGain.gain.setValueAtTime(0.15, startTime);
+            bellGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+
+            bell.connect(bellGain);
+            bellGain.connect(ctx.destination);
+            bell.start(startTime);
+            bell.stop(startTime + 0.4);
+        }
+
+    } catch (e) {
+        console.error('[AUDIO] Legendary win sound error:', e);
+    }
+};
+
+const playLegendarySuspenseSound = () => {
+    if (!audioEnabled) return;
+    try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+
+        // Deep tension drone - builds from rumble to intensity
+        const drone = ctx.createOscillator();
+        const droneGain = ctx.createGain();
+        drone.type = 'sawtooth';
+        drone.frequency.setValueAtTime(35, ctx.currentTime);
+        drone.frequency.linearRampToValueAtTime(100, ctx.currentTime + 3);
+        droneGain.gain.setValueAtTime(0.04, ctx.currentTime);
+        droneGain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 2.5);
+        droneGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 3);
+        drone.connect(droneGain);
+        droneGain.connect(ctx.destination);
+        drone.start(ctx.currentTime);
+        drone.stop(ctx.currentTime + 3);
+
+        // Heartbeat pulses - accelerating
+        const beats = [0, 0.5, 0.9, 1.2, 1.45, 1.65, 1.8, 1.92, 2.02, 2.1, 2.17, 2.23];
+        beats.forEach((time, i) => {
+            const beat = ctx.createOscillator();
+            const beatGain = ctx.createGain();
+            const startTime = ctx.currentTime + time;
+            beat.type = 'sine';
+            beat.frequency.setValueAtTime(55 + i * 3, startTime);
+            beat.frequency.exponentialRampToValueAtTime(25, startTime + 0.12);
+            beatGain.gain.setValueAtTime(0.2 + i * 0.03, startTime);
+            beatGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+            beat.connect(beatGain);
+            beatGain.connect(ctx.destination);
+            beat.start(startTime);
+            beat.stop(startTime + 0.15);
+        });
+
+        // Rising shimmer cascade
+        for (let i = 0; i < 15; i++) {
+            const shimmer = ctx.createOscillator();
+            const shimmerGain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.3 + i * 0.16;
+            shimmer.type = 'sine';
+            shimmer.frequency.setValueAtTime(600 + i * 180, startTime);
+            shimmerGain.gain.setValueAtTime(0.02 + i * 0.008, startTime);
+            shimmerGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.12);
+            shimmer.connect(shimmerGain);
+            shimmerGain.connect(ctx.destination);
+            shimmer.start(startTime);
+            shimmer.stop(startTime + 0.12);
+        }
+    } catch (e) {
+        console.error('[AUDIO] Suspense sound error:', e);
+    }
+};
+
+const playLegendaryImpactSound = () => {
+    if (!audioEnabled) return;
+    try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+
+        // Massive bass impact
+        const impact = ctx.createOscillator();
+        const impactGain = ctx.createGain();
+        impact.type = 'sine';
+        impact.frequency.setValueAtTime(80, ctx.currentTime);
+        impact.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.4);
+        impactGain.gain.setValueAtTime(0.7, ctx.currentTime);
+        impactGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        impact.connect(impactGain);
+        impactGain.connect(ctx.destination);
+        impact.start(ctx.currentTime);
+        impact.stop(ctx.currentTime + 0.5);
+
+        // High frequency crash
+        const crash = ctx.createOscillator();
+        const crashGain = ctx.createGain();
+        crash.type = 'square';
+        crash.frequency.setValueAtTime(3000, ctx.currentTime);
+        crash.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.6);
+        crashGain.gain.setValueAtTime(0.15, ctx.currentTime);
+        crashGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+        crash.connect(crashGain);
+        crashGain.connect(ctx.destination);
+        crash.start(ctx.currentTime);
+        crash.stop(ctx.currentTime + 0.6);
+
+        // Reverb tail
+        for (let i = 0; i < 5; i++) {
+            const rev = ctx.createOscillator();
+            const revGain = ctx.createGain();
+            const startTime = ctx.currentTime + 0.05 + i * 0.08;
+            rev.type = 'sine';
+            rev.frequency.setValueAtTime(1200 - i * 150, startTime);
+            revGain.gain.setValueAtTime(0.08, startTime);
+            revGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+            rev.connect(revGain);
+            revGain.connect(ctx.destination);
+            rev.start(startTime);
+            rev.stop(startTime + 0.3);
+        }
+    } catch (e) {
+        console.error('[AUDIO] Impact sound error:', e);
+    }
+};
+
 // --- THEME COMPONENTS ---
 
 const CyberpunkFrame = () => null;
 
 
-const CyberpunkPointer = ({ tickRef }) => (
-    <div ref={tickRef} className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-30 filter drop-shadow-[0_0_8px_#00f7ff]">
-        <div className="relative">
-            {/* Glow trail effect */}
-            <div className="absolute inset-0 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[50px] border-t-[#00f7ff] blur-sm opacity-60"></div>
+const CyberpunkPointer = ({ tickRef, legendaryGlow, legendaryHint }) => {
+    const isGolden = legendaryGlow || legendaryHint;
+    return (
+        <div
+            ref={tickRef}
+            className={`absolute top-[-15px] left-1/2 -translate-x-1/2 z-30 transition-all duration-700 ${legendaryGlow ? 'scale-115' : ''}`}
+            style={{
+                width: '55px',
+                height: '65px',
+                filter: legendaryGlow
+                    ? 'drop-shadow(0 0 20px #ffd700) drop-shadow(0 0 40px #ffd700) drop-shadow(0 0 60px rgba(255,215,0,0.5))'
+                    : legendaryHint
+                        ? 'drop-shadow(0 0 15px #ffd700) drop-shadow(0 0 8px #ffa500)'
+                        : 'drop-shadow(0 0 12px #00f7ff) drop-shadow(0 0 6px #bc13fe)'
+            }}
+        >
+            <svg width="55" height="65" viewBox="0 0 55 65" className="absolute inset-0 overflow-visible">
+                <defs>
+                    {/* Legendary gradient - rich gold */}
+                    <linearGradient id="ptrLegendary" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fff7cc" />
+                        <stop offset="30%" stopColor="#ffd700" />
+                        <stop offset="70%" stopColor="#ffaa00" />
+                        <stop offset="100%" stopColor="#ff8c00" />
+                    </linearGradient>
 
-            {/* Main pointer */}
-            <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[50px] border-t-[#00f7ff] relative z-10"></div>
+                    {/* Normal gradient - cyberpunk neon */}
+                    <linearGradient id="ptrNormal" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ffffff" />
+                        <stop offset="20%" stopColor="#00f7ff" />
+                        <stop offset="60%" stopColor="#bc13fe" />
+                        <stop offset="100%" stopColor="#ff006e" />
+                    </linearGradient>
 
-            {/* Animated pulsing dot at tip */}
-            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#00f7ff] rounded-full animate-pulse shadow-[0_0_10px_#00f7ff]"></div>
+                    {/* Shine overlay gradient */}
+                    <linearGradient id="ptrShine" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+                        <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+                        <stop offset="100%" stopColor="rgba(255,255,255,0.3)" />
+                    </linearGradient>
+                </defs>
+
+                {/* Shadow layer for 3D effect */}
+                <polygon
+                    points="27.5,65 2,3 53,3"
+                    fill="rgba(0,0,0,0.5)"
+                    transform="translate(1, 2)"
+                />
+
+                {/* Main arrow body */}
+                <polygon
+                    points="27.5,62 3,3 52,3"
+                    fill={isGolden ? 'url(#ptrLegendary)' : 'url(#ptrNormal)'}
+                    className="transition-all duration-500"
+                />
+
+                {/* Inner darker section for depth */}
+                <polygon
+                    points="27.5,55 8,8 47,8"
+                    fill="rgba(0,0,0,0.25)"
+                />
+
+                {/* Shine overlay on left side */}
+                <polygon
+                    points="27.5,62 3,3 20,3 27.5,50"
+                    fill="url(#ptrShine)"
+                    opacity="0.4"
+                />
+
+                {/* Center line detail */}
+                <line
+                    x1="27.5" y1="8"
+                    x2="27.5" y2="55"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="1"
+                />
+
+                {/* Decorative side lines */}
+                <line
+                    x1="15" y1="15"
+                    x2="27.5" y2="45"
+                    stroke={isGolden ? 'rgba(255,215,0,0.3)' : 'rgba(0,247,255,0.3)'}
+                    strokeWidth="1"
+                />
+                <line
+                    x1="40" y1="15"
+                    x2="27.5" y2="45"
+                    stroke={isGolden ? 'rgba(255,215,0,0.3)' : 'rgba(0,247,255,0.3)'}
+                    strokeWidth="1"
+                />
+
+                {/* Outer glowing border */}
+                <polygon
+                    points="27.5,62 3,3 52,3"
+                    fill="none"
+                    stroke={isGolden ? '#ffd700' : '#00f7ff'}
+                    strokeWidth="2"
+                    opacity="0.9"
+                    className="transition-all duration-500"
+                />
+
+                {/* Inner border for extra definition */}
+                <polygon
+                    points="27.5,58 7,7 48,7"
+                    fill="none"
+                    stroke={isGolden ? 'rgba(255,215,0,0.5)' : 'rgba(0,247,255,0.5)'}
+                    strokeWidth="1"
+                />
+
+                {/* Top edge accent line */}
+                <line
+                    x1="3" y1="3"
+                    x2="52" y2="3"
+                    stroke={isGolden ? '#fff7cc' : '#ffffff'}
+                    strokeWidth="1.5"
+                    opacity="0.8"
+                />
+
+                {/* Legendary edge glow animation */}
+                {legendaryGlow && (
+                    <>
+                        {/* Left edge traveling glow */}
+                        <line
+                            x1="27.5" y1="62"
+                            x2="3" y2="3"
+                            stroke="#ffd700"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeDasharray="62"
+                            strokeDashoffset="62"
+                            className="animate-[edgeReveal_1s_ease-in_forwards]"
+                            style={{ filter: 'drop-shadow(0 0 8px #ffd700)' }}
+                        />
+                        {/* Right edge traveling glow */}
+                        <line
+                            x1="27.5" y1="62"
+                            x2="52" y2="3"
+                            stroke="#ffd700"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeDasharray="62"
+                            strokeDashoffset="62"
+                            className="animate-[edgeReveal_1s_ease-in_forwards]"
+                            style={{ filter: 'drop-shadow(0 0 8px #ffd700)' }}
+                        />
+                        {/* Top edge glow - completes last */}
+                        <line
+                            x1="3" y1="3"
+                            x2="52" y2="3"
+                            stroke="#ffd700"
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeDasharray="49"
+                            strokeDashoffset="49"
+                            className="animate-[edgeRevealTop_0.5s_ease-in_0.8s_forwards]"
+                            style={{ filter: 'drop-shadow(0 0 8px #ffd700)' }}
+                        />
+                    </>
+                )}
+            </svg>
+
+            {/* Tip glow dot */}
+            <div className={`absolute bottom-[-4px] left-1/2 -translate-x-1/2 rounded-full transition-all duration-700 z-10
+                ${legendaryGlow
+                    ? 'w-6 h-6 bg-[#ffd700] shadow-[0_0_20px_#ffd700,0_0_40px_#ffd700,0_0_60px_#ffd700] animate-[tipPulse_0.5s_ease-in-out_infinite]'
+                    : legendaryHint
+                        ? 'w-4 h-4 bg-[#ffd700] shadow-[0_0_12px_#ffd700,0_0_24px_#ffd700] animate-pulse'
+                        : 'w-3 h-3 bg-[#00f7ff] shadow-[0_0_10px_#00f7ff] animate-pulse'
+                }`}
+            />
+
+            {/* Sparkle particles from tip (full glow only) */}
+            {legendaryGlow && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-none">
+                    {[...Array(8)].map((_, i) => (
+                        <div
+                            key={`ptr-spark-${i}`}
+                            className="absolute w-1.5 h-1.5 rounded-full bg-yellow-300 animate-[pointerSparkle_0.8s_ease-out_infinite]"
+                            style={{
+                                left: `${-12 + i * 3.5}px`,
+                                bottom: '0px',
+                                animationDelay: `${i * 0.1}s`,
+                                boxShadow: '0 0 6px #ffd700, 0 0 12px rgba(255,215,0,0.5)'
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Continuous subtle pulse for hint mode */}
+            {legendaryHint && !legendaryGlow && (
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0 animate-pulse" style={{
+                        background: 'radial-gradient(circle at 50% 0%, rgba(255,215,0,0.3) 0%, transparent 70%)',
+                        animationDuration: '1.5s'
+                    }} />
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 
 const CyberpunkCenter = ({ isSpinning, size = 600, onSpin }) => {
@@ -339,15 +742,36 @@ export default function Wheel() {
     const [winningIndex, setWinningIndex] = useState(null);
     const [winnerModal, setWinnerModal] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [isLegendaryApproaching, setIsLegendaryApproaching] = useState(false);
+    const [isLegendaryReveal, setIsLegendaryReveal] = useState(false);
+    const [screenFlash, setScreenFlash] = useState(false);
+    const legendaryApproachRef = useRef(false);
+    const [showVipConfirm, setShowVipConfirm] = useState(false);
 
     const { prizes, mustSpin, config, stopSpin, updateConfig, startSpin } = useRouletteStore();
+
+    // Security: blocked IDs and VIP mode from config
+    const blockedIds = config.blockedIds || [];
+    const vipMode = config.vipMode || false;
 
     // Handle manual spin from clicking the logo
     const handleManualSpin = () => {
         if (!isSpinning && prizes.length > 0) {
+            // If VIP mode is active, show confirmation modal
+            if (vipMode) {
+                setShowVipConfirm(true);
+                return;
+            }
             console.log('[WHEEL] Manual spin triggered by logo click');
             startSpin();
         }
+    };
+
+    // Confirm VIP spin
+    const confirmVipSpin = () => {
+        setShowVipConfirm(false);
+        console.log('[WHEEL] VIP spin confirmed by logo click');
+        startSpin();
     };
 
     // Force cyberpunk theme - pop theme was removed
@@ -406,7 +830,7 @@ export default function Wheel() {
             prizes.forEach((prize, i) => {
                 const angle = i * arc;
                 const isWinner = i === winningIndex;
-                const isRare = (prize.probability || 0) === 0;
+                const isRare = (prize.probability || 0) === 0 || blockedIds.includes(prize.id);
 
                 // --- 0% ANIMATED VISUALS ---
                 if (isRare) {
@@ -576,6 +1000,69 @@ export default function Wheel() {
                 }
 
                 ctx.fillText(prize.text, textAnchor, 8, maxWidth);
+
+                // --- 2X BADGE for Legendary prizes when VIP mode is active ---
+                if (isRare && vipMode) {
+                    // Badge positioning - below the prize text
+                    const badgeX = textAnchor - 50;
+                    const badgeY = 35;
+                    const badgeWidth = 45;
+                    const badgeHeight = 22;
+                    const badgeRadius = 8;
+
+                    // Pulsating scale animation
+                    const pulseScale = 1 + Math.sin(time * 4) * 0.1;
+                    ctx.save();
+                    ctx.translate(badgeX, badgeY);
+                    ctx.scale(pulseScale, pulseScale);
+
+                    // Badge background with gradient
+                    const badgeGradient = ctx.createLinearGradient(-badgeWidth/2, -badgeHeight/2, badgeWidth/2, badgeHeight/2);
+                    badgeGradient.addColorStop(0, '#ff4500');
+                    badgeGradient.addColorStop(0.5, '#ff6347');
+                    badgeGradient.addColorStop(1, '#ff4500');
+
+                    ctx.fillStyle = badgeGradient;
+                    ctx.shadowColor = '#ff4500';
+                    ctx.shadowBlur = 15 + Math.sin(time * 4) * 5;
+
+                    // Draw rounded rectangle
+                    ctx.beginPath();
+                    ctx.moveTo(-badgeWidth/2 + badgeRadius, -badgeHeight/2);
+                    ctx.lineTo(badgeWidth/2 - badgeRadius, -badgeHeight/2);
+                    ctx.quadraticCurveTo(badgeWidth/2, -badgeHeight/2, badgeWidth/2, -badgeHeight/2 + badgeRadius);
+                    ctx.lineTo(badgeWidth/2, badgeHeight/2 - badgeRadius);
+                    ctx.quadraticCurveTo(badgeWidth/2, badgeHeight/2, badgeWidth/2 - badgeRadius, badgeHeight/2);
+                    ctx.lineTo(-badgeWidth/2 + badgeRadius, badgeHeight/2);
+                    ctx.quadraticCurveTo(-badgeWidth/2, badgeHeight/2, -badgeWidth/2, badgeHeight/2 - badgeRadius);
+                    ctx.lineTo(-badgeWidth/2, -badgeHeight/2 + badgeRadius);
+                    ctx.quadraticCurveTo(-badgeWidth/2, -badgeHeight/2, -badgeWidth/2 + badgeRadius, -badgeHeight/2);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Badge border
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    // Reset shadow for text
+                    ctx.shadowBlur = 0;
+
+                    // "2X" text
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('2X', 0, 0);
+
+                    // Add sparkle effect on text
+                    ctx.shadowColor = '#ffeb3b';
+                    ctx.shadowBlur = 8;
+                    ctx.fillText('2X', 0, 0);
+
+                    ctx.restore();
+                }
+
                 ctx.restore();
             });
 
@@ -588,39 +1075,111 @@ export default function Wheel() {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         };
 
-    }, [prizes, winningIndex]);
+    }, [prizes, winningIndex, blockedIds]);
 
     // Spin Logic
     useEffect(() => {
         if (mustSpin && prizes.length > 0) {
             setWinningIndex(null);
             setWinnerModal(null);
+            setIsLegendaryApproaching(false);
+            setIsLegendaryReveal(false);
+            setScreenFlash(false);
+            legendaryApproachRef.current = false;
 
-            const eligiblePrizes = prizes.filter(p => (p.probability || 0) > 0);
+            // === SECURITY SYSTEM: Multi-layer prize selection ===
+            const _blockedIds = config.blockedIds || [];
+            const _vipMode = config.vipMode || false;
             let winnerIndex = -1;
+            let selectedPrize = null;
 
-            // SECURITY: Block spin if no eligible prizes (all probabilities are 0%)
-            if (eligiblePrizes.length === 0) {
-                console.error('[ROULETTE] Cannot spin: No eligible prizes (all probabilities are 0%)');
-                stopSpin(null);
-                alert('Erro: Não há prêmios elegíveis para sorteio. Configure pelo menos um prêmio com probabilidade maior que 0%.');
-                return;
-            }
+            if (_vipMode) {
+                // ========== CUSTOMER MODE: Only premium prizes for customers ==========
+                const customerPrizes = prizes.filter(p => _blockedIds.includes(p.id));
 
-            // Weighted random selection from eligible prizes only
-            const totalWeight = eligiblePrizes.reduce((acc, p) => acc + (p.probability || 0), 0);
-            let random = Math.random() * totalWeight;
-            let selectedPrize = eligiblePrizes[eligiblePrizes.length - 1];
-            for (let i = 0; i < eligiblePrizes.length; i++) {
-                random -= (eligiblePrizes[i].probability || 0);
-                if (random <= 0) {
-                    selectedPrize = eligiblePrizes[i];
-                    break;
+                if (customerPrizes.length === 0) {
+                    console.error('[CUSTOMER] No premium prizes configured');
+                    stopSpin(null);
+                    alert('Erro: Nenhum prêmio premium configurado para clientes.');
+                    return;
                 }
+
+                // Equal weight among customer prizes (use probability if set, else equal)
+                const totalCustomerWeight = customerPrizes.reduce((acc, p) => acc + Math.max(p.probability || 0, 1), 0);
+                let random = Math.random() * totalCustomerWeight;
+                selectedPrize = customerPrizes[customerPrizes.length - 1];
+                for (let i = 0; i < customerPrizes.length; i++) {
+                    random -= Math.max(customerPrizes[i].probability || 0, 1);
+                    if (random <= 0) {
+                        selectedPrize = customerPrizes[i];
+                        break;
+                    }
+                }
+                winnerIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+                console.log('[CUSTOMER] Premium prize selected for customer:', selectedPrize.text);
+
+            } else {
+                // ========== NORMAL MODE: Blocked IDs NEVER win ==========
+
+                // LAYER 1: Primary filter - exclude ALL blocked IDs from eligible pool
+                const eligiblePrizes = prizes.filter(p => {
+                    const hasProb = (p.probability || 0) > 0;
+                    const isBlocked = _blockedIds.includes(p.id);
+                    return hasProb && !isBlocked;
+                });
+
+                if (eligiblePrizes.length === 0) {
+                    console.error('[SECURITY] No eligible prizes after blocking. Blocked IDs:', _blockedIds);
+                    stopSpin(null);
+                    alert('Erro: Não há prêmios elegíveis para sorteio. Configure pelo menos um prêmio não-lendário com probabilidade maior que 0%.');
+                    return;
+                }
+
+                // Weighted random selection from eligible-only pool
+                const totalWeight = eligiblePrizes.reduce((acc, p) => acc + (p.probability || 0), 0);
+                let random = Math.random() * totalWeight;
+                selectedPrize = eligiblePrizes[eligiblePrizes.length - 1];
+                for (let i = 0; i < eligiblePrizes.length; i++) {
+                    random -= (eligiblePrizes[i].probability || 0);
+                    if (random <= 0) {
+                        selectedPrize = eligiblePrizes[i];
+                        break;
+                    }
+                }
+
+                // LAYER 2: Secondary verification - double-check selected prize is NOT blocked
+                if (_blockedIds.includes(selectedPrize.id)) {
+                    console.warn('[SECURITY-L2] Blocked prize leaked through! Re-selecting from safe pool.');
+                    selectedPrize = eligiblePrizes[Math.floor(Math.random() * eligiblePrizes.length)];
+                }
+
+                // LAYER 3: Tertiary verification - absolute guarantee
+                if (_blockedIds.includes(selectedPrize.id)) {
+                    console.error('[SECURITY-L3] CRITICAL - blocked prize still selected. Forcing first eligible.');
+                    selectedPrize = eligiblePrizes[0];
+                }
+
+                // LAYER 4: Final assertion - abort if all layers failed
+                if (_blockedIds.includes(selectedPrize.id)) {
+                    console.error('[SECURITY-L4] FATAL - all security layers failed. Aborting spin.');
+                    stopSpin(null);
+                    return;
+                }
+
+                winnerIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+
+                // LAYER 5: Post-selection index validation
+                if (winnerIndex >= 0 && _blockedIds.includes(prizes[winnerIndex].id)) {
+                    console.error('[SECURITY-L5] Index mismatch detected. Aborting.');
+                    stopSpin(null);
+                    return;
+                }
+
+                console.log('[ROULETTE] Prize selected:', selectedPrize.text, '(ID:', selectedPrize.id, ')');
             }
-            winnerIndex = prizes.findIndex(p => p.id === selectedPrize.id);
 
             const prize = prizes[winnerIndex];
+            const isLegendaryWin = _blockedIds.includes(prize.id);
             const arcDeg = 360 / prizes.length;
             const sliceCenter = (winnerIndex * arcDeg) + (arcDeg / 2);
             const targetRotation = 270 - sliceCenter;
@@ -784,76 +1343,152 @@ export default function Wheel() {
                             }
                         );
                     }
+
+                    // Legendary approaching detection - suspense when near end
+                    if (isLegendaryWin && progress > 0.80 && !legendaryApproachRef.current) {
+                        legendaryApproachRef.current = true;
+                        setIsLegendaryApproaching(true);
+                        playLegendarySuspenseSound();
+                        console.log('[LEGENDARY] Approaching legendary prize - suspense activated!');
+                    }
                 },
                 onComplete: () => {
                     currentRotation.current = totalRotation;
                     setWinningIndex(winnerIndex);
                     setIsSpinning(false);
+                    setIsLegendaryApproaching(false);
+                    legendaryApproachRef.current = false;
                     stopSpin(prize);
 
                     console.log('[AUDIO] Spin complete, stopping spin sound');
-                    stopSpinSound(); // Stop the continuous sound - takes 300ms to fade out
+                    stopSpinSound();
 
-                    // Initial confetti burst
-                    const colors = false ? ['#ff00ff', '#ff69b4', '#ffff00', '#ffffff'] : ['#00f7ff', '#ffd700', '#bc13fe', '#ffffff'];
+                    const colors = ['#00f7ff', '#ffd700', '#bc13fe', '#ffffff'];
+                    const isLegendary = _blockedIds.includes(prize.id);
 
-                    confetti({
-                        particleCount: 150,
-                        spread: 100,
-                        origin: { y: 0.3 },
-                        colors: colors,
-                        startVelocity: 60
-                    });
+                    if (isLegendary) {
+                        // === LEGENDARY REVEAL SEQUENCE ===
+                        console.log('[LEGENDARY] Starting reveal sequence for:', prize.text);
 
-                    // Side bursts
-                    setTimeout(() => {
-                        confetti({
-                            particleCount: 80,
-                            angle: 60,
-                            spread: 70,
-                            origin: { x: 0, y: 0.6 },
-                            colors: colors
-                        });
-                        confetti({
-                            particleCount: 80,
-                            angle: 120,
-                            spread: 70,
-                            origin: { x: 1, y: 0.6 },
-                            colors: colors
-                        });
-                    }, 200);
+                        // Phase 1: Pointer golden glow begins (0s)
+                        setIsLegendaryReveal(true);
 
-                    // Continuous sparkles
-                    const sparkleInterval = setInterval(() => {
-                        confetti({
-                            particleCount: 3,
-                            spread: 360,
-                            origin: { x: Math.random(), y: Math.random() * 0.5 },
-                            colors: colors,
-                            gravity: 0.5,
-                            scalar: 0.8
-                        });
-                    }, 100);
-
-                    // Wait for spin sound to fully stop (300ms fade) before showing modal and playing win sound
-                    setTimeout(() => {
-                        setWinnerModal(prize);
-                        clearInterval(sparkleInterval);
-                        console.log('[AUDIO] Playing win sound');
-                        playWinSound(); // Play win sound AFTER spin sound is fully stopped
-                    }, 500); // 500ms ensures 300ms fade + 200ms buffer
-
-                    // Final burst when modal appears
-                    setTimeout(() => {
+                        // Initial golden confetti
                         confetti({
                             particleCount: 100,
-                            spread: 160,
-                            origin: { y: 0.5 },
-                            colors: colors,
-                            shapes: ['circle', 'square'],
-                            gravity: 1.2
+                            spread: 80,
+                            origin: { y: 0.3 },
+                            colors: ['#ffd700', '#ffaa00', '#ff8c00', '#ffffff'],
+                            startVelocity: 50
                         });
-                    }, 800); // Adjusted to match new modal timing
+
+                        // Phase 2: Impact + screen flash (1.5s - after pointer edge glow completes)
+                        setTimeout(() => {
+                            playLegendaryImpactSound();
+                            setScreenFlash(true);
+                            setTimeout(() => setScreenFlash(false), 300);
+
+                            // Golden confetti explosion
+                            confetti({
+                                particleCount: 200,
+                                spread: 120,
+                                origin: { y: 0.4 },
+                                colors: ['#ffd700', '#ffaa00', '#ff8c00', '#fff'],
+                                startVelocity: 70,
+                                gravity: 0.8
+                            });
+                        }, 1500);
+
+                        // Phase 3: Show legendary modal (2.2s)
+                        setTimeout(() => {
+                            setWinnerModal(prize);
+                            setIsLegendaryReveal(false);
+                            playLegendaryWinSound();
+
+                            // Side bursts
+                            confetti({
+                                particleCount: 100,
+                                angle: 60,
+                                spread: 70,
+                                origin: { x: 0, y: 0.6 },
+                                colors: ['#ffd700', '#ffaa00', '#ffffff']
+                            });
+                            confetti({
+                                particleCount: 100,
+                                angle: 120,
+                                spread: 70,
+                                origin: { x: 1, y: 0.6 },
+                                colors: ['#ffd700', '#ffaa00', '#ffffff']
+                            });
+                        }, 2200);
+
+                        // Phase 4: Final burst (3s)
+                        setTimeout(() => {
+                            confetti({
+                                particleCount: 150,
+                                spread: 180,
+                                origin: { y: 0.5 },
+                                colors: ['#ffd700', '#ffaa00', '#ff8c00', '#ffffff'],
+                                shapes: ['circle', 'square'],
+                                gravity: 1.2
+                            });
+                        }, 3000);
+
+                    } else {
+                        // === NORMAL WIN FLOW ===
+                        confetti({
+                            particleCount: 150,
+                            spread: 100,
+                            origin: { y: 0.3 },
+                            colors: colors,
+                            startVelocity: 60
+                        });
+
+                        setTimeout(() => {
+                            confetti({
+                                particleCount: 80,
+                                angle: 60,
+                                spread: 70,
+                                origin: { x: 0, y: 0.6 },
+                                colors: colors
+                            });
+                            confetti({
+                                particleCount: 80,
+                                angle: 120,
+                                spread: 70,
+                                origin: { x: 1, y: 0.6 },
+                                colors: colors
+                            });
+                        }, 200);
+
+                        const sparkleInterval = setInterval(() => {
+                            confetti({
+                                particleCount: 3,
+                                spread: 360,
+                                origin: { x: Math.random(), y: Math.random() * 0.5 },
+                                colors: colors,
+                                gravity: 0.5,
+                                scalar: 0.8
+                            });
+                        }, 100);
+
+                        setTimeout(() => {
+                            setWinnerModal(prize);
+                            clearInterval(sparkleInterval);
+                            playWinSound();
+                        }, 500);
+
+                        setTimeout(() => {
+                            confetti({
+                                particleCount: 100,
+                                spread: 160,
+                                origin: { y: 0.5 },
+                                colors: colors,
+                                shapes: ['circle', 'square'],
+                                gravity: 1.2
+                            });
+                        }, 800);
+                    }
                 }
             });
             }); // end buildupTl.call
@@ -862,7 +1497,7 @@ export default function Wheel() {
 
     return (
         <div
-            className={`relative flex items-center justify-center transition-transform duration-100 ${isBuildup ? 'animate-[buildupShake_0.05s_ease-in-out_infinite]' : isSpinning ? 'animate-[subtleShake_0.1s_ease-in-out_infinite]' : ''}`}
+            className={`relative flex items-center justify-center transition-transform duration-100 ${isBuildup ? 'animate-[buildupShake_0.05s_ease-in-out_infinite]' : isLegendaryApproaching ? 'animate-[legendaryApproach_0.06s_ease-in-out_infinite]' : isSpinning ? 'animate-[subtleShake_0.1s_ease-in-out_infinite]' : ''}`}
             style={{ width: `${size}px`, height: `${size}px` }}
         >
             {/* OBS Mode Indicator */}
@@ -872,7 +1507,7 @@ export default function Wheel() {
                 </div>
             )}
 
-            <CyberpunkPointer tickRef={pointerRef} />
+            <CyberpunkPointer tickRef={pointerRef} legendaryGlow={isLegendaryReveal} legendaryHint={isLegendaryApproaching} />
             <CyberpunkFrame />
             <CyberpunkCenter isSpinning={isSpinning} size={size} onSpin={handleManualSpin} />
 
@@ -1043,74 +1678,262 @@ export default function Wheel() {
                 </div>
             </div>
 
-            {winnerModal && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                    {/* Backdrop with fade-in */}
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out_forwards]"></div>
+            {/* Golden aura during legendary approach */}
+            {isLegendaryApproaching && (
+                <div className="absolute inset-0 z-5 flex items-center justify-center pointer-events-none">
+                    <div
+                        className="absolute rounded-full animate-[goldenPulse_0.6s_ease-in-out_infinite]"
+                        style={{
+                            width: `${size * 1.15}px`,
+                            height: `${size * 1.15}px`,
+                            background: 'radial-gradient(circle, rgba(255,215,0,0.25) 0%, rgba(255,165,0,0.1) 50%, transparent 70%)',
+                            boxShadow: '0 0 60px rgba(255,215,0,0.4), 0 0 120px rgba(255,165,0,0.2)'
+                        }}
+                    />
+                </div>
+            )}
 
-                    {/* Winner announcement container */}
-                    <div className="relative animate-[bounceIn_0.8s_cubic-bezier(0.68,-0.55,0.265,1.55)_forwards] flex flex-col items-center">
-                        {/* Animated glow rings */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className={`absolute w-64 h-64 rounded-full animate-[ping_1.5s_ease-out_infinite] opacity-30
-                                ${false ? 'bg-pink-400' : 'bg-yellow-400'}`}></div>
-                            <div className={`absolute w-48 h-48 rounded-full animate-[ping_1.5s_ease-out_infinite_0.5s] opacity-40
-                                ${false ? 'bg-purple-400' : 'bg-cyan-400'}`}></div>
-                        </div>
-
-                        {/* Decorative stars */}
-                        <div className="absolute inset-0 animate-[spin_3s_linear_infinite]">
-                            {[0, 60, 120, 180, 240, 300].map((angle) => (
-                                <div
-                                    key={angle}
-                                    className={`absolute w-4 h-4 ${false ? 'bg-pink-400' : 'bg-yellow-400'} rounded-full animate-pulse`}
-                                    style={{
-                                        left: '50%',
-                                        top: '50%',
-                                        transform: `rotate(${angle}deg) translateY(-120px)`,
-                                        filter: 'blur(1px)',
-                                        boxShadow: `0 0 20px ${false ? '#ff69b4' : '#ffd700'}`
-                                    }}
-                                />
-                            ))}
-                        </div>
-
-                        {/* Main winner text with enhanced effects */}
-                        <div className="relative px-8 py-6 bg-gradient-to-br from-black/50 to-transparent rounded-3xl border-4 animate-[pulse_2s_ease-in-out_infinite]"
+            {/* Legendary reveal aura - intense golden glow */}
+            {isLegendaryReveal && (
+                <div className="absolute inset-0 z-5 flex items-center justify-center pointer-events-none">
+                    <div
+                        className="absolute rounded-full animate-[goldenPulse_0.5s_ease-in-out_infinite]"
+                        style={{
+                            width: `${size * 1.25}px`,
+                            height: `${size * 1.25}px`,
+                            background: 'radial-gradient(circle, rgba(255,215,0,0.4) 0%, rgba(255,165,0,0.25) 40%, transparent 70%)',
+                            boxShadow: '0 0 100px rgba(255,215,0,0.6), 0 0 200px rgba(255,165,0,0.3)'
+                        }}
+                    />
+                    {/* Golden particles rising */}
+                    {[...Array(12)].map((_, i) => (
+                        <div
+                            key={`gp-${i}`}
+                            className="absolute w-2 h-2 rounded-full bg-yellow-300 animate-[goldenRise_1.5s_ease-out_infinite]"
                             style={{
-                                borderColor: false ? '#ff69b4' : '#ffd700',
-                                boxShadow: `0 0 40px ${false ? '#ff69b4' : '#ffd700'}, inset 0 0 20px rgba(255,255,255,0.1)`
-                            }}>
-                            <h1
-                                className={`text-7xl font-black uppercase text-center drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] animate-[textGlow_1.5s_ease-in-out_infinite]
-                                ${false ? 'text-white' : 'text-[#ffff00]'}`}
-                                style={{
-                                    textShadow: '0 0 20px #ffff00, 0 0 40px #ffff00, 0 0 60px #ffd700, 0 5px 10px rgba(0,0,0,0.5)',
-                                    WebkitTextStroke: false ? '3px #ff00ff' : '2px #000',
-                                    letterSpacing: '0.05em'
-                                }}
-                            >
-                                {winnerModal.text}
-                            </h1>
+                                left: `${20 + i * 5}%`,
+                                bottom: '30%',
+                                animationDelay: `${i * 0.12}s`,
+                                boxShadow: '0 0 8px #ffd700'
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
 
-                            {/* Shimmer effect overlay */}
-                            <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_linear_infinite] -translate-x-full"></div>
+            {/* Screen flash for legendary impact */}
+            {screenFlash && (
+                <div className="fixed inset-0 z-[10000] pointer-events-none animate-[flashFade_0.3s_ease-out_forwards]"
+                    style={{
+                        background: 'radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,255,255,0.7) 50%, rgba(255,215,0,0.4) 100%)'
+                    }}
+                />
+            )}
+
+            {/* VIP Mode Confirmation Modal */}
+            {showVipConfirm && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-[fadeIn_0.3s_ease-out]"
+                        onClick={() => setShowVipConfirm(false)}
+                    />
+
+                    {/* Modal Card */}
+                    <div className="relative z-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.3)] max-w-md w-full animate-[scaleIn_0.3s_ease-out]">
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent animate-pulse" />
+
+                        {/* Content */}
+                        <div className="relative p-6 sm:p-8">
+                            {/* Icon */}
+                            <div className="flex justify-center mb-6">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-emerald-500/30 rounded-full blur-xl animate-pulse" />
+                                    <div className="relative bg-gradient-to-br from-emerald-500 to-green-600 p-4 rounded-full">
+                                        <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Victory banner */}
-                        <div className={`mt-4 px-6 py-2 rounded-full font-bold text-xl animate-[bounceIn_1s_cubic-bezier(0.68,-0.55,0.265,1.55)_0.3s_forwards] opacity-0
-                            ${false ? 'bg-gradient-to-r from-pink-500 to-purple-500' : 'bg-gradient-to-r from-yellow-500 to-orange-500'}
-                            text-white shadow-lg`}
-                            style={{
-                                boxShadow: `0 5px 25px ${false ? '#ff69b4' : '#ffd700'}`
-                            }}>
-                            🎉 PARABÉNS! 🎉
+                            {/* Title */}
+                            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400">
+                                Modo Cliente Ativo
+                            </h2>
+
+                            {/* Description */}
+                            <p className="text-center text-gray-300 mb-6 leading-relaxed">
+                                Você está prestes a girar a roleta no <span className="text-emerald-400 font-semibold">Modo Cliente</span>.
+                                <br />
+                                Este é um giro especial para <span className="text-yellow-400 font-semibold">quem fez uma compra</span>.
+                                <br />
+                                <span className="text-sm text-gray-400 mt-2 block">Premiações lendárias estão disponíveis!</span>
+                            </p>
+
+                            {/* Warning badge */}
+                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-6">
+                                <p className="text-yellow-400 text-sm text-center font-medium">
+                                    ⚠️ Certifique-se de que este cliente realizou uma compra válida
+                                </p>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowVipConfirm(false)}
+                                    className="flex-1 py-3 px-4 rounded-xl font-semibold text-gray-300 bg-gray-700/50 hover:bg-gray-700 border border-gray-600 transition-all active:scale-95"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={confirmVipSpin}
+                                    className="flex-1 py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg shadow-emerald-900/50 transition-all active:scale-95"
+                                >
+                                    Confirmar Giro
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
+
+            {winnerModal && (() => {
+                const isLegendary = blockedIds.includes(winnerModal.id);
+
+                return (
+                    <div className={`fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none ${isLegendary ? 'animate-[screenShake_0.5s_ease-in-out]' : ''}`}>
+                        {/* Backdrop with fade-in - covers entire viewport */}
+                        <div className={`fixed inset-0 backdrop-blur-lg animate-[fadeIn_0.3s_ease-out_forwards] ${isLegendary ? 'bg-black/90' : 'bg-black/85'}`}></div>
+
+                        {isLegendary && (
+                            <>
+                                {/* LEGENDARY: Golden lightning bolts */}
+                                {[...Array(12)].map((_, i) => (
+                                    <div
+                                        key={`lightning-${i}`}
+                                        className="absolute w-1 bg-gradient-to-b from-yellow-300 via-yellow-500 to-transparent animate-[lightning_0.6s_ease-out_infinite]"
+                                        style={{
+                                            left: `${10 + i * 8}%`,
+                                            top: '-10%',
+                                            height: `${50 + Math.random() * 30}%`,
+                                            animationDelay: `${i * 0.08}s`,
+                                            boxShadow: '0 0 20px rgba(255,215,0,0.8)',
+                                            opacity: 0.6
+                                        }}
+                                    />
+                                ))}
+
+                                {/* LEGENDARY: Radial light explosion */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-full h-full bg-gradient-radial from-yellow-500/40 via-transparent to-transparent animate-[pulseGlow_1.5s_ease-in-out_infinite]"></div>
+                                </div>
+
+                                {/* LEGENDARY: Rotating golden rings */}
+                                {[...Array(3)].map((_, i) => (
+                                    <div
+                                        key={`ring-${i}`}
+                                        className="absolute rounded-full border-4 border-yellow-400/60 animate-spin"
+                                        style={{
+                                            width: `${300 + i * 150}px`,
+                                            height: `${300 + i * 150}px`,
+                                            animationDuration: `${3 + i}s`,
+                                            animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
+                                            boxShadow: '0 0 30px rgba(255,215,0,0.5)'
+                                        }}
+                                    />
+                                ))}
+                            </>
+                        )}
+
+                        {/* Winner announcement container */}
+                        <div className={`relative flex flex-col items-center px-6 ${isLegendary ? 'animate-[legendaryBounce_1s_cubic-bezier(0.68,-0.55,0.265,1.55)_forwards]' : 'animate-[bounceIn_0.8s_cubic-bezier(0.68,-0.55,0.265,1.55)_forwards]'}`}>
+                            {!isLegendary && (
+                                <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: -1 }}>
+                                    <div className="absolute w-72 h-72 rounded-full animate-[ping_1.5s_ease-out_infinite] opacity-20 bg-cyan-400"></div>
+                                    <div className="absolute w-56 h-56 rounded-full animate-[ping_1.5s_ease-out_infinite_0.5s] opacity-30 bg-purple-400"></div>
+                                </div>
+                            )}
+
+                            {/* Modern card container */}
+                            <div className={`relative rounded-2xl overflow-visible shadow-2xl ${isLegendary ? 'animate-[cardPulse_1.5s_ease-in-out_infinite]' : ''}`}
+                                style={{
+                                    boxShadow: isLegendary
+                                        ? '0 30px 60px -15px rgba(0,0,0,0.9), 0 0 120px rgba(255,215,0,0.6), 0 0 200px rgba(255,215,0,0.3)'
+                                        : '0 25px 50px -12px rgba(0,0,0,0.8), 0 0 80px rgba(0,247,255,0.3)'
+                                }}>
+
+                                {/* Content */}
+                                <div className={`relative px-10 py-8 rounded-2xl ${isLegendary ? 'bg-gradient-to-br from-yellow-900/30 via-gray-900/95 to-yellow-900/30' : 'bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95'}`}>
+                                    {/* Top banner */}
+                                    <div className="text-center mb-4">
+                                        <div className={`inline-flex items-center gap-2 px-6 py-2 rounded-full border ${isLegendary ? 'bg-gradient-to-r from-yellow-600/40 to-orange-600/40 border-yellow-400/60 shadow-[0_0_20px_rgba(255,215,0,0.5)]' : 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30'}`}>
+                                            <span className="text-2xl">{isLegendary ? '⭐' : '🎉'}</span>
+                                            <span className={`font-bold text-lg tracking-wider ${isLegendary ? 'text-yellow-300 animate-pulse' : 'text-yellow-400'}`}>
+                                                {isLegendary ? '✨ LENDÁRIO ✨' : 'VOCÊ GANHOU'}
+                                            </span>
+                                            <span className="text-2xl">{isLegendary ? '⭐' : '🎉'}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Prize text */}
+                                    <div className="text-center relative">
+                                        <h1 className={`text-5xl md:text-6xl font-black text-transparent bg-clip-text animate-[textGlow_1.5s_ease-in-out_infinite] py-2 ${isLegendary ? 'bg-gradient-to-r from-yellow-300 via-yellow-400 to-orange-400' : 'bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400'}`}
+                                            style={{
+                                                filter: isLegendary
+                                                    ? 'drop-shadow(0 0 30px rgba(255,215,0,0.8)) drop-shadow(0 0 60px rgba(255,165,0,0.5))'
+                                                    : 'drop-shadow(0 0 20px rgba(0,247,255,0.5)) drop-shadow(0 0 40px rgba(188,19,254,0.3))',
+                                                letterSpacing: '0.02em',
+                                                lineHeight: '1.2'
+                                            }}>
+                                            {winnerModal.text}
+                                        </h1>
+
+                                        {/* Animated underline */}
+                                        <div className={`mt-4 mx-auto w-32 h-1 rounded-full animate-pulse ${isLegendary ? 'bg-gradient-to-r from-transparent via-yellow-400 to-transparent' : 'bg-gradient-to-r from-transparent via-cyan-400 to-transparent'}`}></div>
+                                    </div>
+
+                                    {/* Bottom sparkle effect */}
+                                    <div className="mt-6 flex justify-center gap-2">
+                                        {[...Array(isLegendary ? 7 : 5)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`w-2 h-2 rounded-full animate-pulse ${isLegendary ? 'bg-yellow-300' : 'bg-yellow-400'}`}
+                                                style={{
+                                                    animationDelay: `${i * 0.15}s`,
+                                                    boxShadow: isLegendary ? '0 0 15px rgba(255,215,0,1)' : '0 0 10px rgba(255,215,0,0.8)'
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Shimmer effect overlay */}
+                                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                                    <div className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-[shimmer_2s_linear_infinite] -translate-x-full ${isLegendary ? 'via-yellow-300/30' : 'via-white/10'}`}></div>
+                                </div>
+                            </div>
+
+                            {/* Floating particles */}
+                            {[...Array(isLegendary ? 20 : 8)].map((_, i) => (
+                                <div
+                                    key={`particle-${i}`}
+                                    className="absolute w-3 h-3 rounded-full animate-[floatUp_2s_ease-out_infinite]"
+                                    style={{
+                                        left: isLegendary ? `${5 + i * 5}%` : `${20 + i * 10}%`,
+                                        bottom: '-20px',
+                                        background: isLegendary ? '#ffd700' : (i % 2 === 0 ? '#00f7ff' : '#ffd700'),
+                                        boxShadow: `0 0 ${isLegendary ? '15' : '10'}px ${isLegendary ? '#ffd700' : (i % 2 === 0 ? '#00f7ff' : '#ffd700')}`,
+                                        animationDelay: `${i * (isLegendary ? 0.1 : 0.2)}s`,
+                                        opacity: isLegendary ? 0.9 : 0.7
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                );
+            })()}
             <style jsx>{`
                 @keyframes bounceIn {
                     0% { transform: scale(0) rotate(-180deg); opacity: 0; }
@@ -1121,6 +1944,10 @@ export default function Wheel() {
                 @keyframes fadeIn {
                     0% { opacity: 0; }
                     100% { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    0% { opacity: 0; transform: scale(0.8); }
+                    100% { opacity: 1; transform: scale(1); }
                 }
                 @keyframes textGlow {
                     0%, 100% { filter: brightness(1) drop-shadow(0 0 10px currentColor); }
@@ -1195,6 +2022,86 @@ export default function Wheel() {
                     70% { transform: translate(-1px, 3px); }
                     80% { transform: translate(1px, -3px); }
                     90% { transform: translate(-2px, 2px); }
+                }
+                @keyframes floatUp {
+                    0% { transform: translateY(0) scale(1); opacity: 0; }
+                    10% { opacity: 0.7; }
+                    90% { opacity: 0.7; }
+                    100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+                }
+                @keyframes screenShake {
+                    0%, 100% { transform: translate(0, 0); }
+                    10% { transform: translate(-10px, 5px) rotate(-1deg); }
+                    20% { transform: translate(10px, -5px) rotate(1deg); }
+                    30% { transform: translate(-8px, 8px) rotate(-0.5deg); }
+                    40% { transform: translate(8px, -8px) rotate(0.5deg); }
+                    50% { transform: translate(-5px, 5px) rotate(-0.5deg); }
+                    60% { transform: translate(5px, -5px) rotate(0.5deg); }
+                    70% { transform: translate(-3px, 3px) rotate(-0.3deg); }
+                    80% { transform: translate(3px, -3px) rotate(0.3deg); }
+                    90% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+                }
+                @keyframes legendaryBounce {
+                    0% { transform: scale(0) rotate(-360deg); opacity: 0; }
+                    50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+                    75% { transform: scale(0.9) rotate(-5deg); opacity: 1; }
+                    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+                }
+                @keyframes lightning {
+                    0% { opacity: 0; transform: translateY(-20px) scaleY(0); }
+                    10% { opacity: 1; transform: translateY(0) scaleY(1); }
+                    20% { opacity: 0.8; }
+                    30% { opacity: 0; }
+                    100% { opacity: 0; transform: translateY(100%) scaleY(0.5); }
+                }
+                @keyframes pulseGlow {
+                    0%, 100% { opacity: 0.3; transform: scale(1); }
+                    50% { opacity: 0.6; transform: scale(1.2); }
+                }
+                @keyframes cardPulse {
+                    0%, 100% { transform: scale(1); filter: brightness(1); }
+                    50% { transform: scale(1.02); filter: brightness(1.15); }
+                }
+                @keyframes legendaryApproach {
+                    0%, 100% { transform: translate(0, 0); }
+                    10% { transform: translate(-4px, 3px); }
+                    20% { transform: translate(4px, -3px); }
+                    30% { transform: translate(-3px, -4px); }
+                    40% { transform: translate(3px, 4px); }
+                    50% { transform: translate(-4px, -2px); }
+                    60% { transform: translate(4px, 2px); }
+                    70% { transform: translate(-2px, 4px); }
+                    80% { transform: translate(2px, -4px); }
+                    90% { transform: translate(-3px, 3px); }
+                }
+                @keyframes edgeReveal {
+                    0% { stroke-dashoffset: 62; }
+                    100% { stroke-dashoffset: 0; }
+                }
+                @keyframes edgeRevealTop {
+                    0% { stroke-dashoffset: 49; }
+                    100% { stroke-dashoffset: 0; }
+                }
+                @keyframes tipPulse {
+                    0%, 100% { transform: translateX(-50%) scale(1); }
+                    50% { transform: translateX(-50%) scale(1.5); }
+                }
+                @keyframes pointerSparkle {
+                    0% { opacity: 1; transform: translateY(0) scale(1); }
+                    100% { opacity: 0; transform: translateY(-25px) scale(0); }
+                }
+                @keyframes goldenPulse {
+                    0%, 100% { opacity: 0.6; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.08); }
+                }
+                @keyframes goldenRise {
+                    0% { opacity: 0; transform: translateY(0) scale(1); }
+                    20% { opacity: 1; }
+                    100% { opacity: 0; transform: translateY(-80px) scale(0.3); }
+                }
+                @keyframes flashFade {
+                    0% { opacity: 1; }
+                    100% { opacity: 0; }
                 }
                 .stroke-text-pop { -webkit-text-stroke: 3px #ff69b4; }
                 .stroke-text-cyber { -webkit-text-stroke: 2px #000; }
